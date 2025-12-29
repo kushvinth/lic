@@ -5,9 +5,6 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/pypi/v/lic.svg" />
-  <img src="https://img.shields.io/pypi/pyversions/lic.svg" />
-  <img src="https://img.shields.io/pypi/dm/lic" />
   <img src="https://img.shields.io/github/license/kushvinth/lic" />
 </p>
 
