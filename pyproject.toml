@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lic"
+version = "0.1.0"
+description = "Minimal license generator"
+authors = [{ name = "Kushvinth" }]
+dependencies = [
+    "rich>=13.0.0",
+    "httpx>=0.24.0",
+    "questionary>=2.0.0",
+]
+requires-python = ">=3.12"
+
+[project.urls]
+Homepage = "https://github.com/kushvinth/lic"
+Repository = "https://github.com/kushvinth/lic"
+Issues = "https://github.com/kushvinth/lic/issues"
+
+[project.scripts]
+lic = "lic.cli:main"
+
+[tool.setuptools.packages]
+find = {}
