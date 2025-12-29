@@ -16,11 +16,11 @@ No more going to GitHub, creating a file, typing 'LICENSE', picking a license, p
 
 ### Installation
 
-#### Using UV
+#### Using Brew
 
 ```bash
-uv tap kushvinth/tap
-uv install lic
+brew tap kushvinth/tap
+brew install lic
 ```
 
 #### From source
