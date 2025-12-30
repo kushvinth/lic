@@ -6,6 +6,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/github/license/kushvinth/lic" />
+  <img src="https://img.shields.io/pypi/v/lic-cli" />
 </p>
 
 ## Overview
@@ -14,32 +15,28 @@ A minimal, interactive license generator that fetches licenses from GitHub's off
 
 No more going to GitHub, creating a file, typing 'LICENSE', picking a license, pushing and pulling. Just run `lic` and generate your license locally.
 
+Works on **macOS, Linux, and Windows**.
 
 ## Installation
 
-### Homebrew (recommended)
+### Homebrew (macOS/Linux)
 
 ```bash
 brew tap kushvinth/tap
 brew install lic
 ```
 
-This installs `lic` as a globally available CLI.
-
----
-
-### Install as a uv tool
-
-Requires **Python 3.12+** and **uv**.
+### PyPI (recommended - cross-platform)
 
 ```bash
-uv tool install git+https://github.com/kushvinth/lic
-```
+# Using uvx (recommended)
+uvx lic-cli
 
-Ensure the uv tool path is on your PATH:
+# Or install globally with pipx
+pipx install lic-cli
 
-```bash
-uv tool ensurepath
+# Or with uv
+uv tool install lic-cli
 ```
 
 ### From source
@@ -61,12 +58,12 @@ lic
 - Fork the repository
 - Create a branch
   ```bash
-  git checkout -b contibution/blah-blah-blah
+  git checkout -b contribution/blah-blah-blah
   ```
 - Commit your changes and push to your branch
   ```bash
   git commit -m "made an blah-blah-blah"
-  git push origin contibution/blah-blah-blah
+  git push origin contribution/blah-blah-blah
   ```
 - Open a pull request
 
