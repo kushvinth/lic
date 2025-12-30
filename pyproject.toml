@@ -1,5 +1,5 @@
 [project]
-name = "lic"
+name = "lic-cli"
 version = "0.1.0"
 description = "Minimal license generator"
 readme = "README.md"
