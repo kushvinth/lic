@@ -23,4 +23,4 @@ Repository = "https://github.com/kushvinth/lic"
 Issues = "https://github.com/kushvinth/lic/issues"
 
 [project.scripts]
-lic = "lic.cli:app"
+lic = "lic.cli:main"
