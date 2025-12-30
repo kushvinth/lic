@@ -1,7 +1,7 @@
 # LIC
 
 <p align="center">
-  <img src="./assets/demo.gif" alt="lic demo" />
+  <img src="https://github.com/kushvinth/lic/blob/main/assets/demo.gif?raw=true" alt="lic demo" />
 </p>
 
 <p align="center">
