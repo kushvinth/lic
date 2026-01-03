@@ -1,0 +1,52 @@
+name: Release to Homebrew
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy-homebrew:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        ref: main
+        fetch-depth: 0
+
+    - name: Extract version from pyproject.toml
+      id: version
+      run: |
+        VERSION=$(grep '^version = ' pyproject.toml | sed 's/version = "\(.*\)"/\1/')
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+    - name: Download release tarball & calculate SHA256
+      id: archive
+      run: |
+        URL="${{ github.event.release.tarball_url }}"
+        wget -q "$URL" -O /tmp/source.tar.gz
+        SHA256=$(sha256sum /tmp/source.tar.gz | awk '{print $1}')
+
+        echo "url=$URL" >> $GITHUB_OUTPUT
+        echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+
+    - name: Update Homebrew formula
+      run: |
+        FORMULA="Formula/lic.rb"
+
+        sed -i \
+          -e "s|^  url .*|  url \"${{ steps.archive.outputs.url }}\"|" \
+          -e "s|^  sha256 .*|  sha256 \"${{ steps.archive.outputs.sha256 }}\"|" \
+          -e "s|^  version .*|  version \"${{ steps.version.outputs.version }}\"|" \
+          "$FORMULA"
+
+    - name: Commit and push formula update
+      run: |
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+        git add Formula/lic.rb
+        git commit -m "brew: release v${{ steps.version.outputs.version }}"
+        git push origin main
