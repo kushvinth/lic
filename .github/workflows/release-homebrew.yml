@@ -27,7 +27,7 @@ jobs:
       id: archive
       run: |
         URL="${{ github.event.release.tarball_url }}"
-        wget -q "$URL" -O /tmp/source.tar.gz
+        wget -nv "$URL" -O /tmp/source.tar.gz
         if [ $? -ne 0 ] || [ ! -s /tmp/source.tar.gz ]; then
           echo "Error: Failed to download valid tarball from $URL" >&2
           exit 1
