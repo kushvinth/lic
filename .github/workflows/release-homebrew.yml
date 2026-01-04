@@ -28,6 +28,10 @@ jobs:
       run: |
         URL="${{ github.event.release.tarball_url }}"
         wget -q "$URL" -O /tmp/source.tar.gz
+        if [ $? -ne 0 ] || [ ! -s /tmp/source.tar.gz ]; then
+          echo "Error: Failed to download valid tarball from $URL" >&2
+          exit 1
+        fi
         SHA256=$(sha256sum /tmp/source.tar.gz | awk '{print $1}')
 
         echo "url=$URL" >> $GITHUB_OUTPUT
