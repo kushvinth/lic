@@ -25,7 +25,7 @@ def fetch_licenses():
     response.raise_for_status()
     return {lic["key"]: lic for lic in response.json()}
 
-
+# Fetching only the required license (if provided as an arg) to enhance speed
 def get_license(key):
     response = httpx.get(f"https://api.github.com/licenses/{key}", timeout=10.0)
     response.raise_for_status()
