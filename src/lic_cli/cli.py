@@ -1,4 +1,5 @@
 import sys
+import argparse
 import subprocess
 from pathlib import Path
 from datetime import datetime
@@ -39,68 +40,121 @@ def render_license(content, author, year):
     return content
 
 
+def get_license_key_interactive(licenses):
+    """Interactive selection of license key from available licenses."""
+    keys = list(licenses.keys())
+    selected = questionary.select(
+        "Choose a license:",
+        choices=[licenses[k]["name"] for k in keys],
+        use_arrow_keys=True,
+        style=questionary.Style([
+            ('qmark', 'fg:#673ab7 bold'), ('question', 'bold'),
+            ('answer', 'fg:#00ff00 bold'), ('pointer', 'fg:#673ab7 bold'),
+            ('highlighted', 'fg:#00ff00 bold')
+        ])
+    ).ask()
+    
+    if not selected:
+        return None
+    
+    return keys[[licenses[k]["name"] for k in keys].index(selected)]
+
+
+def get_author_input(provided_author=None):
+    """Get author from arguments or interactive prompt."""
+    if provided_author:
+        console.print(f"[green]✓ Author: {provided_author}[/green]")
+        return provided_author
+    
+    git_name = get_git_name()
+    author = questionary.text(
+        "Author:",
+        default=git_name if git_name else "",
+        instruction="",
+        style=questionary.Style([
+            ('qmark', 'fg:#673ab7 bold'), ('question', 'bold'),
+            ('answer', 'fg:#00ff00 bold')
+        ])
+    ).ask()
+    
+    print("\033[A\033[K", end="")
+    console.print(f"[green]✓ Author: {author}[/green]")
+    return author
+
+
+def get_year_input(provided_year=None):
+    """Get year from arguments or interactive prompt."""
+    if provided_year:
+        console.print(f"[green]✓ Year: {provided_year}[/green]")
+        return provided_year
+    
+    year = questionary.text(
+        "Year:",
+        default=str(datetime.now().year),
+        instruction="",
+        style=questionary.Style([
+            ('qmark', 'fg:#673ab7 bold'), ('question', 'bold'),
+            ('answer', 'fg:#00ff00 bold')
+        ])
+    ).ask()
+    
+    print("\033[A\033[K", end="")
+    console.print(f"[green]✓ Year: {year}[/green]")
+    return year
+
+
+def save_license(content):
+    """Save license content to LICENSE file."""
+    Path("LICENSE").write_text(content)
+
+
 def main():
-    # console.print(Panel("[bold cyan]License Generator[/bold cyan]\n[dim]Generate licenses from GitHub[/dim]",
-    #                     border_style="cyan", expand=False))
-    # console.print()
+    # Parse command-line arguments
+    parser = argparse.ArgumentParser(
+        description="Generate licenses from GitHub",
+        prog="lic"
+    )
+    parser.add_argument(
+        "-l", "--license",
+        help="License key (e.g., mit, apache-2.0, gpl-3.0)",
+        metavar="LICENSE"
+    )
+    parser.add_argument(
+        "-a", "--author",
+        help="Author/copyright holder name",
+        metavar="AUTHOR"
+    )
+    parser.add_argument(
+        "-y", "--year",
+        help="Year for the license",
+        metavar="YEAR"
+    )
+    args = parser.parse_args()
     
     try:
-        console.print("[bold]Loading licenses...[/bold]")
-        with console.status("[bold cyan]Fetching from GitHub...", spinner="dots"):
-            licenses = fetch_licenses()
+        # Get license key
+        if args.license:
+            key = args.license
+            console.print(f"[green]✓ {key}[/green]")
+        else:
+            console.print("[bold]Loading licenses...[/bold]")
+            with console.status("[bold cyan]Fetching from GitHub...", spinner="dots"):
+                licenses = fetch_licenses()
+            console.print(f"[dim]Found {len(licenses)} licenses[/dim]\n")
+            
+            key = get_license_key_interactive(licenses)
+            if not key:
+                return console.print("\n[yellow]Cancelled[/yellow]")
+            console.print(f"[green]✓ {licenses[key]['name']}[/green]")
         
-        console.print(f"[dim]Found {len(licenses)} licenses[/dim]\n")
+        # Get author and year
+        author = get_author_input(args.author)
+        year = get_year_input(args.year)
         
-        keys = list(licenses.keys())
-        selected = questionary.select(
-            "Choose a license:",
-            choices=[licenses[k]["name"] for k in keys],
-            use_arrow_keys=True,
-            style=questionary.Style([
-                ('qmark', 'fg:#673ab7 bold'), ('question', 'bold'),
-                ('answer', 'fg:#00ff00 bold'), ('pointer', 'fg:#673ab7 bold'),
-                ('highlighted', 'fg:#00ff00 bold')
-            ])
-        ).ask()
-        
-        if not selected:
-            return console.print("\n[yellow]Cancelled[/yellow]")
-        
-        key = keys[[licenses[k]["name"] for k in keys].index(selected)]
-        console.print(f"[green]✓ {selected}[/green]")
-        
-        git_name = get_git_name()
-        author = questionary.text(
-            "Author:",
-            default=git_name if git_name else "",
-            instruction="",
-            style=questionary.Style([
-                ('qmark', 'fg:#673ab7 bold'), ('question', 'bold'),
-                ('answer', 'fg:#00ff00 bold')
-            ])
-        ).ask()
-        
-        # Move cursor up and print checkmark
-        print("\033[A\033[K", end="")
-        console.print(f"[green]✓ Author: {author}[/green]")
-        
-        year = questionary.text(
-            "Year:",
-            default=str(datetime.now().year),
-            instruction="",
-            style=questionary.Style([
-                ('qmark', 'fg:#673ab7 bold'), ('question', 'bold'),
-                ('answer', 'fg:#00ff00 bold')
-            ])
-        ).ask()
-        
-        # Move cursor up and print checkmark
-        print("\033[A\033[K", end="")
-        console.print(f"[green]✓ Year: {year}[/green]")
-        
+        # Generate and save license
         with console.status("[bold cyan]Generating license..."):
             content = render_license(get_license(key), author, year)
-            Path("LICENSE").write_text(content)
+            save_license(content)
         
         console.print("[green]✔ License created successfully[/green]")
         
@@ -113,4 +167,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
