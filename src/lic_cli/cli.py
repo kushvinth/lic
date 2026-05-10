@@ -60,11 +60,18 @@ def get_license_key_interactive(licenses):
     return keys[[licenses[k]["name"] for k in keys].index(selected)]
 
 
-def get_author_input(provided_author=None):
-    """Get author from arguments or interactive prompt."""
+def get_author_input(provided_author=None, non_interactive=False):
+    """Get author from arguments, git config, or interactive prompt."""
     if provided_author:
         console.print(f"[green]✓ Author: {provided_author}[/green]")
         return provided_author
+    
+    if non_interactive:
+        git_name = get_git_name()
+        if git_name:
+            console.print(f"[green]✓ Author: {git_name} (from git config)[/green]")
+            return git_name
+        raise ValueError("Author required in non-interactive mode (use --author or set git user.name)")
     
     git_name = get_git_name()
     author = questionary.text(
@@ -82,11 +89,16 @@ def get_author_input(provided_author=None):
     return author
 
 
-def get_year_input(provided_year=None):
+def get_year_input(provided_year=None, non_interactive=False):
     """Get year from arguments or interactive prompt."""
     if provided_year:
         console.print(f"[green]✓ Year: {provided_year}[/green]")
         return provided_year
+    
+    if non_interactive:
+        current_year = str(datetime.now().year)
+        console.print(f"[green]✓ Year: {current_year} (current year)[/green]")
+        return current_year
     
     year = questionary.text(
         "Year:",
@@ -129,6 +141,11 @@ def main():
         help="Year for the license",
         metavar="YEAR"
     )
+    parser.add_argument(
+        "-n", "--non-interactive",
+        action="store_true",
+        help="Disable interactive prompts; --license required; --author optional (uses git config if available); --year defaults to current year"
+    )
     args = parser.parse_args()
     
     try:
@@ -137,6 +154,8 @@ def main():
             key = args.license
             console.print(f"[green]✓ {key}[/green]")
         else:
+            if args.non_interactive:
+                raise ValueError("License required in non-interactive mode (use --license)")
             console.print("[bold]Loading licenses...[/bold]")
             with console.status("[bold cyan]Fetching from GitHub...", spinner="dots"):
                 licenses = fetch_licenses()
@@ -148,8 +167,8 @@ def main():
             console.print(f"[green]✓ {licenses[key]['name']}[/green]")
         
         # Get author and year
-        author = get_author_input(args.author)
-        year = get_year_input(args.year)
+        author = get_author_input(args.author, args.non_interactive)
+        year = get_year_input(args.year, args.non_interactive)
         
         # Generate and save license
         with console.status("[bold cyan]Generating license..."):
