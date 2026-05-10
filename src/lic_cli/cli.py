@@ -146,9 +146,29 @@ def main():
         action="store_true",
         help="Disable interactive prompts; --license required; --author optional (uses git config if available); --year defaults to current year"
     )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Overwrite LICENSE file if it exists"
+    )
     args = parser.parse_args()
     
     try:
+        # Check for existing LICENSE file
+        license_path = Path("LICENSE")
+        if license_path.exists() and not args.force:
+            if args.non_interactive:
+                raise FileExistsError("LICENSE already exists. Use --force to overwrite.")
+            else:
+                overwrite = questionary.confirm(
+                    "LICENSE file already exists. Overwrite?",
+                    default=False
+                ).ask()
+                print("\033[A\033[K", end="")
+                if not overwrite:
+                    console.print("[yellow]Cancelled[/yellow]")
+                    return
+        
         # Get license key
         if args.license:
             key = args.license
