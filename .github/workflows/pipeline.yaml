@@ -34,8 +34,7 @@ jobs:
 
       - name: Run ruff check
         run: |
-          uvx ruff check . || echo "Ruff not configured, skipping..."
-        #continue-on-error: true
+          uvx ruff check .
 
   test:
     name: Run Tests
