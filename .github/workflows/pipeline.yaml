@@ -34,8 +34,7 @@ jobs:
 
       - name: Run ruff check
         run: |
-          uvx ruff check . || echo "Ruff not configured, skipping..."
-        #continue-on-error: true
+          uvx ruff check .
 
   test:
     name: Run Tests
@@ -66,7 +65,7 @@ jobs:
       - name: Run tests
         run: |
           uv run pytest -v
-        continue-on-error: true
+        continue-on-error: false
 
   build:
     name: Build Package
@@ -103,8 +102,7 @@ jobs:
     needs: [build]
     if: github.event_name == 'release' && github.event.action == 'published'
     permissions:
-      id-token: write  # Required for trusted publishing
-    
+      id-token: write  # Only needed for OIDC trusted publishing (omit PYPI_API_TOKEN when using it)
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
